@@ -2959,7 +2959,8 @@ function GetCursorCommandLine
 		if ($positionOfCursor.Offset -ge $token.Extent.StartOffset -and
 		    $positionOfCursor.Offset -le $token.Extent.EndOffset) {
 			# if current token is nested, explore it
-			if ($token.Kind -eq [Management.Automation.Language.TokenKind]::StringExpandable) {
+			if ($token.Kind -eq [Management.Automation.Language.TokenKind]::StringExpandable -and
+			    $token.NestedTokens) {
 				return GetCursorCommandLine $ast $token.NestedTokens $positionOfCursor
 			}
 			# abort if current token is syntax
