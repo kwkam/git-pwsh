@@ -18,7 +18,7 @@
 # To use these routines:
 #
 #    1) Copy this file to where profile.ps1 is located. e.g.
-#        ~/Documents/PowerShell/git-completion.ps1
+#        $(Split-Path -Parent $PROFILE)/git-completion.ps1
 #    2) Add the following line to your profile.ps1:
 #        . $PSScriptRoot/git-completion.ps1
 #    3) Consider changing your prompt to also show the current branch,
