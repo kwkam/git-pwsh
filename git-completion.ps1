@@ -1047,12 +1047,8 @@ function __git_complete
 	{
 		if (! $GIT_COMPLETION.Contains('ALL_COMMANDS')) {
 			$GIT_COMPLETION.ALL_COMMANDS = switch -wildcard (__git_commands) {
-				'*--*' { # helper pattern
-					continue
-				}
-				default {
-					$_
-				}
+				'*--*'             { <# helper pattern #> continue }
+				default { $_ }
 			}
 		}
 		return $GIT_COMPLETION.ALL_COMMANDS
@@ -1062,234 +1058,82 @@ function __git_complete
 	{
 		if (! $GIT_COMPLETION.Contains('PORCELAIN_COMMANDS')) {
 			$GIT_COMPLETION.PORCELAIN_COMMANDS = switch -wildcard (__git_all_commands) {
-				'*--*' { # helper pattern
-					continue
-				}
-				'applymbox' { # ask gittus
-					continue
-				}
-				'applypatch' { # ask gittus
-					continue
-				}
-				'archimport' { # import
-					continue
-				}
-				'cat-file' { # plumbing
-					continue
-				}
-				'check-attr' { # plumbing
-					continue
-				}
-				'check-ignore' { # plumbing
-					continue
-				}
-				'check-mailmap' { # plumbing
-					continue
-				}
-				'check-ref-format' { # plumbing
-					continue
-				}
-				'checkout-index' { # plumbing
-					continue
-				}
-				'column' { # internal helper
-					continue
-				}
-				'commit-tree' { # plumbing
-					continue
-				}
-				'count-objects' { # infrequent
-					continue
-				}
-				'credential' { # credentials
-					continue
-				}
-				'credential-*' { # credentials helper
-					continue
-				}
-				'cvsexportcommit' { # export
-					continue
-				}
-				'cvsimport' { # import
-					continue
-				}
-				'cvsserver' { # daemon
-					continue
-				}
-				'daemon' { # daemon
-					continue
-				}
-				'diff-files' { # plumbing
-					continue
-				}
-				'diff-index' { # plumbing
-					continue
-				}
-				'diff-tree' { # plumbing
-					continue
-				}
-				'fast-import' { # import
-					continue
-				}
-				'fast-export' { # export
-					continue
-				}
-				'fsck-objects' { # plumbing
-					continue
-				}
-				'fetch-pack' { # plumbing
-					continue
-				}
-				'fmt-merge-msg' { # plumbing
-					continue
-				}
-				'for-each-ref' { # plumbing
-					continue
-				}
-				'hash-object' { # plumbing
-					continue
-				}
-				'http-*' { # transport
-					continue
-				}
-				'index-pack' { # plumbing
-					continue
-				}
-				'init-db' { # deprecated
-					continue
-				}
-				'local-fetch' { # plumbing
-					continue
-				}
-				'ls-files' { # plumbing
-					continue
-				}
-				'ls-remote' { # plumbing
-					continue
-				}
-				'ls-tree' { # plumbing
-					continue
-				}
-				'mailinfo' { # plumbing
-					continue
-				}
-				'mailsplit' { # plumbing
-					continue
-				}
-				'merge-*' { # plumbing
-					continue
-				}
-				'mktree' { # plumbing
-					continue
-				}
-				'mktag' { # plumbing
-					continue
-				}
-				'pack-objects' { # plumbing
-					continue
-				}
-				'pack-redundant' { # plumbing
-					continue
-				}
-				'pack-refs' { # plumbing
-					continue
-				}
-				'parse-remote' { # plumbing
-					continue
-				}
-				'patch-id' { # plumbing
-					continue
-				}
-				'prune' { # plumbing
-					continue
-				}
-				'prune-packed' { # plumbing
-					continue
-				}
-				'quiltimport' { # import
-					continue
-				}
-				'read-tree' { # plumbing
-					continue
-				}
-				'receive-pack' { # plumbing
-					continue
-				}
-				'remote-*' { # transport
-					continue
-				}
-				'rerere' { # plumbing
-					continue
-				}
-				'rev-list' { # plumbing
-					continue
-				}
-				'rev-parse' { # plumbing
-					continue
-				}
-				'runstatus' { # plumbing
-					continue
-				}
-				'sh-setup' { # internal
-					continue
-				}
-				'shell' { # daemon
-					continue
-				}
-				'show-ref' { # plumbing
-					continue
-				}
-				'send-pack' { # plumbing
-					continue
-				}
-				'show-index' { # plumbing
-					continue
-				}
-				'ssh-*' { # transport
-					continue
-				}
-				'stripspace' { # plumbing
-					continue
-				}
-				'symbolic-ref' { # plumbing
-					continue
-				}
-				'unpack-file' { # plumbing
-					continue
-				}
-				'unpack-objects' { # plumbing
-					continue
-				}
-				'update-index' { # plumbing
-					continue
-				}
-				'update-ref' { # plumbing
-					continue
-				}
-				'update-server-info' { # daemon
-					continue
-				}
-				'upload-archive' { # plumbing
-					continue
-				}
-				'upload-pack' { # plumbing
-					continue
-				}
-				'write-tree' { # plumbing
-					continue
-				}
-				'var' { # infrequent
-					continue
-				}
-				'verify-pack' { # infrequent
-					continue
-				}
-				'verify-tag' { # plumbing
-					continue
-				}
-				default {
-					$_
-				}
+				'*--*'             { <# helper pattern #> continue }
+				'applymbox'        { <# ask gittus #> continue }
+				'applypatch'       { <# ask gittus #> continue }
+				'archimport'       { <# import #> continue }
+				'cat-file'         { <# plumbing #> continue }
+				'check-attr'       { <# plumbing #> continue }
+				'check-ignore'     { <# plumbing #> continue }
+				'check-mailmap'    { <# plumbing #> continue }
+				'check-ref-format' { <# plumbing #> continue }
+				'checkout-index'   { <# plumbing #> continue }
+				'column'           { <# internal helper #> continue }
+				'commit-tree'      { <# plumbing #> continue }
+				'count-objects'    { <# infrequent #> continue }
+				'credential'       { <# credentials #> continue }
+				'credential-*'     { <# credentials helper #> continue }
+				'cvsexportcommit'  { <# export #> continue }
+				'cvsimport'        { <# import #> continue }
+				'cvsserver'        { <# daemon #> continue }
+				'daemon'           { <# daemon #> continue }
+				'diff-files'       { <# plumbing #> continue }
+				'diff-index'       { <# plumbing #> continue }
+				'diff-tree'        { <# plumbing #> continue }
+				'fast-import'      { <# import #> continue }
+				'fast-export'      { <# export #> continue }
+				'fsck-objects'     { <# plumbing #> continue }
+				'fetch-pack'       { <# plumbing #> continue }
+				'fmt-merge-msg'    { <# plumbing #> continue }
+				'for-each-ref'     { <# plumbing #> continue }
+				'hash-object'      { <# plumbing #> continue }
+				'http-*'           { <# transport #> continue }
+				'index-pack'       { <# plumbing #> continue }
+				'init-db'          { <# deprecated #> continue }
+				'local-fetch'      { <# plumbing #> continue }
+				'ls-files'         { <# plumbing #> continue }
+				'ls-remote'        { <# plumbing #> continue }
+				'ls-tree'          { <# plumbing #> continue }
+				'mailinfo'         { <# plumbing #> continue }
+				'mailsplit'        { <# plumbing #> continue }
+				'merge-*'          { <# plumbing #> continue }
+				'mktree'           { <# plumbing #> continue }
+				'mktag'            { <# plumbing #> continue }
+				'pack-objects'     { <# plumbing #> continue }
+				'pack-redundant'   { <# plumbing #> continue }
+				'pack-refs'        { <# plumbing #> continue }
+				'parse-remote'     { <# plumbing #> continue }
+				'patch-id'         { <# plumbing #> continue }
+				'prune'            { <# plumbing #> continue }
+				'prune-packed'     { <# plumbing #> continue }
+				'quiltimport'      { <# import #> continue }
+				'read-tree'        { <# plumbing #> continue }
+				'receive-pack'     { <# plumbing #> continue }
+				'remote-*'         { <# transport #> continue }
+				'rerere'           { <# plumbing #> continue }
+				'rev-list'         { <# plumbing #> continue }
+				'rev-parse'        { <# plumbing #> continue }
+				'runstatus'        { <# plumbing #> continue }
+				'sh-setup'         { <# internal #> continue }
+				'shell'            { <# daemon #> continue }
+				'show-ref'         { <# plumbing #> continue }
+				'send-pack'        { <# plumbing #> continue }
+				'show-index'       { <# plumbing #> continue }
+				'ssh-*'            { <# transport #> continue }
+				'stripspace'       { <# plumbing #> continue }
+				'symbolic-ref'     { <# plumbing #> continue }
+				'unpack-file'      { <# plumbing #> continue }
+				'unpack-objects'   { <# plumbing #> continue }
+				'update-index'     { <# plumbing #> continue }
+				'update-ref'       { <# plumbing #> continue }
+				'update-server-info' { <# daemon #> continue }
+				'upload-archive'   { <# plumbing #> continue }
+				'upload-pack'      { <# plumbing #> continue }
+				'write-tree'       { <# plumbing #> continue }
+				'var'              { <# infrequent #> continue }
+				'verify-pack'      { <# infrequent #> continue }
+				'verify-tag'       { <# plumbing #> continue }
+				default { $_ }
 			}
 		}
 		return $GIT_COMPLETION.PORCELAIN_COMMANDS
@@ -1309,12 +1153,8 @@ function __git_complete
 		$lastcmd = GetArgumentCommandLine $aliased 'args' $info.command_argument_curr
 
 		switch -wildcard ($lastcmd.exec) {
-			{$_ -in '!git','!git.exe','git','git.exe'} { # git itself
-				continue
-			}
-			default {
-				$_
-			}
+			{$_ -in 'git','git.exe'} { <# git itself #> continue }
+			default { $_ }
 		}
 		$lastcmd.words
 	}
