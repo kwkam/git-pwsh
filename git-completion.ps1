@@ -441,7 +441,7 @@ function __git_complete
 	param (
 		[parameter(mandatory = $true)]
 		[hashtable] $cmdline,
-		[switch] $noexpand
+		[hashtable] $expand
 	)
 
 	$info = @{}
@@ -533,7 +533,7 @@ function __git_complete
 			$quote = $matches.q
 		}
 
-		$result = [Collections.Generic.List[Management.Automation.CompletionResult]]::new()
+		$results = [Collections.Generic.List[Management.Automation.CompletionResult]]::new()
 		$complete.ForEach({
 			$suggest = $_.suggest
 			$type = $_.type
@@ -570,10 +570,10 @@ function __git_complete
 					}
 					$s = "$quote$s$quote"
 				}
-				$result.Add([Management.Automation.CompletionResult]::new($s, $s, $type, $s))
+				$results.Add([Management.Automation.CompletionResult]::new($s, $s, $type, $s))
 			})
 		})
-		return [Management.Automation.CommandCompletion]::new($result, -1, $opts.replaceIndex, $opts.replaceLength)
+		return [Management.Automation.CommandCompletion]::new($results, -1, $opts.replaceIndex, $opts.replaceLength)
 	}
 
 	# This function is equivalent to
@@ -1143,20 +1143,11 @@ function __git_complete
 	function __git_aliased_command
 	{
 		param (
+			[parameter(mandatory = $true)]
 			[string] $command
 		)
 
-		$aliased = __git config --get alias.$command
-		if (! $aliased) {
-			return
-		}
-		$lastcmd = GetArgumentCommandLine $aliased 'args' $info.command_argument_curr
-
-		switch -wildcard ($lastcmd.exec) {
-			{$_ -in 'git','git.exe'} { <# git itself #> continue }
-			default { $_ }
-		}
-		$lastcmd.words
+		__git config --get alias.$command
 	}
 
 	# __git_find_on_cmdline requires 1 argument
@@ -2576,20 +2567,13 @@ function __git_complete
 			}
 
 			default {
-				if ($noexpand) {
-					# prevents infinite loop
+				if (! $expand) {
+					# do not expand alias
 					return
 				}
-				$lastcmd = __git_aliased_command $command
-				if (! $lastcmd) {
-					# cannot find alias command
-					return
-				}
-				$cmdline.words = @(
-					$lastcmd
-					$cmdline.words[1..$cmdline.words.Count]
-				)
-				return __git_complete -noexpand $cmdline
+				$expand.inputScript = __git_aliased_command $command
+				$expand.paramName = 'args'
+				$expand.paramIndex = $info.parameter_curr
 			}
 
 		}
@@ -2637,9 +2621,9 @@ function __git_complete
 					$info.argument_count = 0
 				}
 				if ($info.command) {
-					$info.command_argument_count++
+					$info.parameter_count++
 					if ($_ -eq $info.prev) {
-						$info.command_argument_curr = $info.command_argument_count
+						$info.parameter_curr = $info.parameter_count
 					}
 				}
 				$_
@@ -2647,9 +2631,9 @@ function __git_complete
 			}
 			'^-' {
 				if ($info.command) {
-					$info.command_argument_count++
+					$info.parameter_count++
 					if ($_ -eq $info.prev) {
-						$info.command_argument_curr = $info.command_argument_count
+						$info.parameter_curr = $info.parameter_count
 					}
 				}
 				$_
@@ -2659,13 +2643,13 @@ function __git_complete
 				if (! $info.command) {
 					$info.command = $_
 					$info.argument_count = 0
-					$info.command_argument_count = 0
-					$info.command_argument_curr = 0
+					$info.parameter_count = 0
+					$info.parameter_curr = 0
 				} else {
 					$info.argument_count++
-					$info.command_argument_count++
+					$info.parameter_count++
 					if ($_ -eq $info.prev) {
-						$info.command_argument_curr = $info.command_argument_count
+						$info.parameter_curr = $info.parameter_count
 					}
 				}
 				$_
@@ -2875,17 +2859,17 @@ function GetCursorCommandLine
 	return $cmdline
 }
 
-function GetArgumentCommandLine
+function GetParamCommandLine
 {
 	Param (
 		[Parameter(Mandatory = $true, Position = 0)]
 		[string] $inputScript,
 
 		[Parameter(Mandatory = $true, Position = 1)]
-		[string] $name,
+		[string] $paramName,
 
 		[Parameter(Position = 2)]
-		[int] $index = -1
+		[int] $paramIndex = -1
 	)
 
 	$parsedInput = [Management.Automation.CommandCompletion]::MapStringInputToParsedInput(
@@ -2904,7 +2888,7 @@ function GetArgumentCommandLine
 			switch -wildcard ($tokens[$idx]) {
 				'-c*' {
 					if (++$idx -lt $tokens.Count) {
-						return GetArgumentCommandLine $(ValueOfToken $tokens[$idx]) $name $index
+						return GetParamCommandLine $(ValueOfToken $tokens[$idx]) $paramName $paramIndex
 					}
 				}
 			}
@@ -2914,12 +2898,12 @@ function GetArgumentCommandLine
 	$tokens = for ($idx = 0; $idx -lt $tokens.Count; $idx++) {
 		$token = $tokens[$idx]
 		if ($token.Kind -eq [Management.Automation.Language.TokenKind]::SplattedVariable -and
-		    $token.Name -eq $name) {
+		    $token.Name -eq $paramName) {
 			$positionOfCursor = $token.Extent.StartScriptPosition
 			break
 		}
 		if ($token.Kind -eq [Management.Automation.Language.TokenKind]::Variable -and
-		    $token.Name -eq $name) {
+		    $token.Name -eq $paramName) {
 			$nxt = $idx + 1
 			if ($nxt -lt $tokens.Count -and
 			    $tokens[$nxt].Extent.StartOffset -eq $token.Extent.EndOffset) {
@@ -2934,15 +2918,15 @@ function GetArgumentCommandLine
 					if ($range.Count -ge 3) {
 						# NOTE for $var[0..$var.Count], always assume index < $var.Count
 						if (($range[0].Kind -eq [Management.Automation.Language.TokenKind]::Number -and
-						     $range[0].Value -le $index) -and
+						     $range[0].Value -le $paramIndex) -and
 						    ($range[2].Kind -ne [Management.Automation.Language.TokenKind]::Number -or
-						     $range[2].Value -ge $index)) {
+						     $range[2].Value -ge $paramIndex)) {
 							$positionOfCursor = $token.Extent.StartScriptPosition
 							break
 						}
 					} elseif ($range.Count -eq 1) {
 						if ($range[0].Kind -eq [Management.Automation.Language.TokenKind]::Number -and
-						    $range[0].Value -eq $index) {
+						    $range[0].Value -eq $paramIndex) {
 							$positionOfCursor = $token.Extent.StartScriptPosition
 							break
 						}
@@ -2997,13 +2981,25 @@ function TabExpansion2
 		[Parameter(ParameterSetName = 'AstInputSet', Position = 3)]
 		[hashtable] $options = $null
 	)
-	$parsed = @{}
+	$parsed = @{options = $options}
 	$cmdline = GetCursorCommandLine @PSBoundParameters -parsed $parsed
 	if ($cmdline.exec -in 'git','git.exe') {
-		$result = __git_complete $cmdline
+		$expand = @{}
+		$results = __git_complete $cmdline $expand
 	}
-	if (! $result) {
-		$result = NotGitTabExpansion2 $parsed.ast $parsed.tokens $parsed.positionOfCursor $options
+	if (! $results -and $expand.inputScript) {
+		$aliased = GetParamCommandLine @expand
+		$cmdline.words = @(
+			if ($aliased.exec -notin 'git','git.exe') {
+				$aliased.exec
+			}
+			$aliased.words
+			$cmdline.words[1..$cmdline.words.Count]
+		)
+		$results = __git_complete $cmdline
 	}
-	return $result
+	if (! $results) {
+		$results = NotGitTabExpansion2 @parsed
+	}
+	return $results
 }
