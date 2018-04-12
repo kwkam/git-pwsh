@@ -441,7 +441,8 @@ function __git_complete
 	param (
 		[parameter(mandatory = $true)]
 		[hashtable] $cmdline,
-		[hashtable] $expand
+		[hashtable] $expand,
+		[hashtable] $opts = $GIT_COMPLETION
 	)
 
 	$info = @{}
@@ -510,7 +511,7 @@ function __git_complete
 			[string] $word = $info.curr,
 			[string] $suffix,
 			[switch] $text,
-			[hashtable] $opts = @{}
+			[hashtable] $compopt = @{}
 		)
 
 		if ($word -like '--*=') {
@@ -520,13 +521,13 @@ function __git_complete
 		$pattern = "$word*"
 
 		# set common parameters
-		if (! ($opts.Contains('replaceIndex') -or $opts.Contains('replaceLength'))) {
+		if (! ($compopt.Contains('replaceIndex') -or $compopt.Contains('replaceLength'))) {
 			if ($cmdline.curr) {
-				$opts.replaceIndex = $cmdline.curr.Extent.StartOffset
-				$opts.replaceLength = $cmdline.curr.Extent.EndOffset - $opts.replaceIndex
+				$compopt.replaceIndex = $cmdline.curr.Extent.StartOffset
+				$compopt.replaceLength = $cmdline.curr.Extent.EndOffset - $compopt.replaceIndex
 			} else {
-				$opts.replaceIndex = $cmdline.cursor.Offset
-				$opts.replaceLength = 0
+				$compopt.replaceIndex = $cmdline.cursor.Offset
+				$compopt.replaceLength = 0
 			}
 		}
 		if ($cmdline.curr.Text -match '^(?<q>[''"])') {
@@ -573,7 +574,7 @@ function __git_complete
 				$results.Add([Management.Automation.CompletionResult]::new($s, $s, $type, $s))
 			})
 		})
-		return [Management.Automation.CommandCompletion]::new($results, -1, $opts.replaceIndex, $opts.replaceLength)
+		return [Management.Automation.CommandCompletion]::new($results, -1, $compopt.replaceIndex, $compopt.replaceLength)
 	}
 
 	# This function is equivalent to
@@ -596,18 +597,18 @@ function __git_complete
 		# avoid conflicting with object method
 		$key = "_$($cmd -join '_')"
 
-		if (! $GIT_COMPLETION.SUBOPTIONS.Contains($key)) {
+		if (! $opts.SUBOPTIONS.Contains($key)) {
 			# NOTE depends on exe output
 			$list = @(
 				$(__git @cmd --git-completion-helper) -split ' +'
 				$incl
 			)
 			if ($list) {
-				$GIT_COMPLETION.SUBOPTIONS.$key = $list.Where({$_ -and $_ -notin $excl})
+				$opts.SUBOPTIONS.$key = $list.Where({$_ -and $_ -notin $excl})
 			}
 		}
 
-		return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.$key}
+		return __gitcomp @{suggest = $opts.SUBOPTIONS.$key}
 	}
 
 	# Append completion to current word
@@ -640,7 +641,7 @@ function __git_complete
 			$replaceIndex = $cmdline.cursor.Offset
 			$replaceLength = 0
 		}
-		return __gitcomp @params -opts @{
+		return __gitcomp @params -compopt @{
 			replaceIndex = $replaceIndex
 			replaceLength = $replaceLength
 		}
@@ -856,7 +857,7 @@ function __git_complete
 	# is needed.
 	function __git_merge_strategies
 	{
-		if (! $GIT_COMPLETION.Contains('MERGE_STRATEGIES')) {
+		if (! $opts.Contains('MERGE_STRATEGIES')) {
 			# NOTE depends on exe output
 			$list = $(__git2 merge -s help).ForEach({
 				if ($_ -match '^[^:]+: *(?<v>.+)\.$') {
@@ -864,10 +865,10 @@ function __git_complete
 				}
 			})
 			if ($list) {
-				$GIT_COMPLETION.MERGE_STRATEGIES = $list
+				$opts.MERGE_STRATEGIES = $list
 			}
 		}
-		return $GIT_COMPLETION.MERGE_STRATEGIES
+		return $opts.MERGE_STRATEGIES
 	}
 
 	function __git_complete_revlist
@@ -1045,19 +1046,19 @@ function __git_complete
 
 	function __git_all_commands
 	{
-		if (! $GIT_COMPLETION.Contains('ALL_COMMANDS')) {
-			$GIT_COMPLETION.ALL_COMMANDS = switch -wildcard (__git_commands) {
+		if (! $opts.Contains('ALL_COMMANDS')) {
+			$opts.ALL_COMMANDS = switch -wildcard (__git_commands) {
 				'*--*'             { <# helper pattern #> continue }
 				default { $_ }
 			}
 		}
-		return $GIT_COMPLETION.ALL_COMMANDS
+		return $opts.ALL_COMMANDS
 	}
 
 	function __git_porcelain_commands
 	{
-		if (! $GIT_COMPLETION.Contains('PORCELAIN_COMMANDS')) {
-			$GIT_COMPLETION.PORCELAIN_COMMANDS = switch -wildcard (__git_all_commands) {
+		if (! $opts.Contains('PORCELAIN_COMMANDS')) {
+			$opts.PORCELAIN_COMMANDS = switch -wildcard (__git_all_commands) {
 				'*--*'             { <# helper pattern #> continue }
 				'applymbox'        { <# ask gittus #> continue }
 				'applypatch'       { <# ask gittus #> continue }
@@ -1136,7 +1137,7 @@ function __git_complete
 				default { $_ }
 			}
 		}
-		return $GIT_COMPLETION.PORCELAIN_COMMANDS
+		return $opts.PORCELAIN_COMMANDS
 	}
 
 	# __git_aliased_command requires 1 argument
@@ -1238,14 +1239,14 @@ function __git_complete
 
 			'am' {
 				if (Test-Path -PathType Container -LiteralPath "$(__git_repo_path)/rebase-apply") {
-					return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.AM}
+					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.AM}
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--whitespace=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.WHITESPACELIST}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.WHITESPACELIST}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-utf8' -excl $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.AM
+						return __gitcomp_builtin $command '--no-utf8' -excl $opts.SUBOPTIONS.INPROGRESS.AM
 					}
 				}
 			}
@@ -1253,7 +1254,7 @@ function __git_complete
 			'apply' {
 				switch -regex ($info.curr) {
 					'^(?<k>--whitespace=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.WHITESPACELIST}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.WHITESPACELIST}
 					}
 					'^--' {
 						return __gitcomp_builtin $command
@@ -1376,7 +1377,7 @@ function __git_complete
 				# check if --track, --no-track, or --no-guess was specified
 				# if so, disable DWIM mode
 				$track_opt = @{track = $true}
-				if ($GIT_COMPLETION.CHECKOUT_NO_GUESS -or
+				if ($opts.CHECKOUT_NO_GUESS -or
 				    $(__git_find_on_cmdline '--track','--no-track','--no-guess')) {
 					$track_opt.track = $false
 				}
@@ -1389,11 +1390,11 @@ function __git_complete
 
 			'cherry-pick' {
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/CHERRY_PICK_HEAD") {
-					return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.CHERRY_PICK}
+					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.CHERRY_PICK}
 				}
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command -excl $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.CHERRY_PICK
+						return __gitcomp_builtin $command -excl $opts.SUBOPTIONS.INPROGRESS.CHERRY_PICK
 					}
 				}
 				return __gitcomp -text @{suggest = __git_refs}
@@ -1431,7 +1432,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git_refs -cur $matches.v}
 					}
 					'^(?<k>--untracked-files=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.UNTRACKED_FILE_MODES}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.UNTRACKED_FILE_MODES}
 					}
 					'^--' {
 						return __gitcomp_builtin $command '--no-edit','--verify'
@@ -1498,16 +1499,16 @@ function __git_complete
 						return __gitcomp -text @{suggest = 'man','info','web','html'}
 					}
 					{$_ -in 'log.date'} {
-						return __gitcomp -text @{suggest = $GIT_COMPLETION.LOG_DATE_FORMATS}
+						return __gitcomp -text @{suggest = $opts.LOG_DATE_FORMATS}
 					}
 					{$_ -in 'sendemail.aliasesfiletype'} {
 						return __gitcomp -text @{suggest = 'mutt','mailrc','pine','elm','gnus'}
 					}
 					{$_ -in 'sendemail.confirm'} {
-						return __gitcomp -text @{suggest = $GIT_COMPLETION.SEND_EMAIL_CONFIRM}
+						return __gitcomp -text @{suggest = $opts.SEND_EMAIL_CONFIRM}
 					}
 					{$_ -in 'sendemail.suppresscc'} {
-						return __gitcomp -text @{suggest = $GIT_COMPLETION.SEND_EMAIL_SUPPRESSCC}
+						return __gitcomp -text @{suggest = $opts.SEND_EMAIL_SUPPRESSCC}
 					}
 					{$_ -in 'sendemail.transferencoding'} {
 						return __gitcomp -text @{suggest = '7bit','8bit','quoted-printable','base64'}
@@ -1580,7 +1581,7 @@ function __git_complete
 						return __gitcomp_append -text $matches.k $matches.v @{suggest = 'insteadOf','pushInsteadOf'}
 					}
 				}
-				return __gitcomp -text @{suggest = $GIT_COMPLETION.CONFIGLIST}
+				return __gitcomp -text @{suggest = $opts.CONFIGLIST}
 			}
 
 			'describe' {
@@ -1598,17 +1599,17 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--diff-algorithm=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_ALGORITHMS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_ALGORITHMS}
 					}
 					'^(?<k>--submodule=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_SUBMODULE_FORMATS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_SUBMODULE_FORMATS}
 					}
 					'^--' {
 						return __gitcomp @{
 							suggest = @(
 								'--cached','--staged','--pickaxe-all','--pickaxe-regex'
 								'--base','--ours','--theirs','--no-index'
-								$GIT_COMPLETION.SUBOPTIONS.DIFF_COMMON
+								$opts.SUBOPTIONS.DIFF_COMMON
 							)
 						}
 					}
@@ -1622,7 +1623,7 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--tool=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.SUBOPTIONS.MERGETOOL_COMMON}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.SUBOPTIONS.MERGETOOL_COMMON}
 					}
 					'^--' {
 						return __gitcomp @{
@@ -1630,7 +1631,7 @@ function __git_complete
 								'--base','--cached','--ours','--theirs'
 								'--pickaxe-all','--pickaxe-regex'
 								'--relative','--staged'
-								$GIT_COMPLETION.SUBOPTIONS.DIFF_COMMON
+								$opts.SUBOPTIONS.DIFF_COMMON
 							)
 						}
 					}
@@ -1641,7 +1642,7 @@ function __git_complete
 			'fetch' {
 				switch -regex ($info.curr) {
 					'^(?<k>--recurse-submodules=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.FETCH_RECURSE_SUBMODULES}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.FETCH_RECURSE_SUBMODULES}
 					}
 					'^--' {
 						return __gitcomp_builtin $command '--no-tags'
@@ -1675,7 +1676,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'deep','shallow'}
 					}
 					'^--' {
-						return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.FORMAT_PATCH}
+						return __gitcomp @{suggest = $opts.SUBOPTIONS.FORMAT_PATCH}
 					}
 				}
 				return __git_complete_revlist
@@ -1795,28 +1796,28 @@ function __git_complete
 					'^(?<k>--(?:pretty|format)=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{
 							suggest = @(
-								$GIT_COMPLETION.LOG_PRETTY_FORMATS
+								$opts.LOG_PRETTY_FORMATS
 								__git_get_config_variables 'pretty'
 							)
 						}
 					}
 					'^(?<k>--date=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.LOG_DATE_FORMATS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.LOG_DATE_FORMATS}
 					}
 					'^(?<k>--decorate=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'full','short','no'}
 					}
 					'^(?<k>--diff-algorithm=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_ALGORITHMS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_ALGORITHMS}
 					}
 					'^(?<k>--submodule=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_SUBMODULE_FORMATS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_SUBMODULE_FORMATS}
 					}
 					'^--' {
 						return __gitcomp @{
 							suggest = @(
-								$GIT_COMPLETION.SUBOPTIONS.LOG_COMMON
-								$GIT_COMPLETION.SUBOPTIONS.LOG_SHORTLOG
+								$opts.SUBOPTIONS.LOG_COMMON
+								$opts.SUBOPTIONS.LOG_SHORTLOG
 								'--root','--topo-order','--date-order','--reverse'
 								'--follow','--full-diff'
 								'--abbrev-commit','--abbrev='
@@ -1833,7 +1834,7 @@ function __git_complete
 									$merge
 								}
 								'--pickaxe-all','--pickaxe-regex'
-								$GIT_COMPLETION.SUBOPTIONS.DIFF_COMMON
+								$opts.SUBOPTIONS.DIFF_COMMON
 							)
 						}
 					}
@@ -1871,7 +1872,7 @@ function __git_complete
 			'mergetool' {
 				switch -regex ($info.curr) {
 					'^(?<k>--tool=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.SUBOPTIONS.MERGETOOL_COMMON}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.SUBOPTIONS.MERGETOOL_COMMON}
 					}
 					'^--' {
 						return __gitcomp @{suggest = '--tool=','--prompt','--no-prompt'}
@@ -1973,7 +1974,7 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--recurse-submodules=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.FETCH_RECURSE_SUBMODULES}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.FETCH_RECURSE_SUBMODULES}
 					}
 					'^--' {
 						return __gitcomp_builtin $command @(
@@ -2009,7 +2010,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git_remotes}
 					}
 					'^(?<k>--recurse-submodules=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.PUSH_RECURSE_SUBMODULES}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.PUSH_RECURSE_SUBMODULES}
 					}
 					'^(?<k>--force-with-lease=(?:[^:]+:)?)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git_refs -cur $matches.v}
@@ -2047,21 +2048,21 @@ function __git_complete
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/rebase-merge/interactive") {
 					return __gitcomp @{
 						suggest = @(
-							$GIT_COMPLETION.SUBOPTIONS.INPROGRESS.REBASE
+							$opts.SUBOPTIONS.INPROGRESS.REBASE
 							'--edit-todo'
 						)
 					}
 				}
 				if ((Test-Path -PathType Container -LiteralPath "$(__git_repo_path)/rebase-apply") -or
 				    (Test-Path -PathType Container -LiteralPath "$(__git_repo_path)/rebase-merge")) {
-					return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.REBASE}
+					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.REBASE}
 				}
 				if (__git_complete_strategy) {
 					return $info.result
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--whitespace=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.WHITESPACELIST}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.WHITESPACELIST}
 					}
 					'^--' {
 						return __gitcomp @{
@@ -2101,10 +2102,10 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^(?<k>--confirm=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.SEND_EMAIL_CONFIRM}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.SEND_EMAIL_CONFIRM}
 					}
 					'^(?<k>--suppress-cc=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.SEND_EMAIL_SUPPRESSCC}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.SEND_EMAIL_SUPPRESSCC}
 					}
 					'^(?<k>--smtp-encryption=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'ssl','tls'}
@@ -2127,7 +2128,7 @@ function __git_complete
 								'--smtp-server-port','--smtp-encryption=','--smtp-user'
 								'--subject','--suppress-cc=','--suppress-from','--thread','--to'
 								'--validate','--no-validate'
-								$GIT_COMPLETION.SUBOPTIONS.FORMAT_PATCH
+								$opts.SUBOPTIONS.FORMAT_PATCH
 							)
 						}
 					}
@@ -2145,7 +2146,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'none','untracked','dirty','all'}
 					}
 					'^(?<k>--untracked-files=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.UNTRACKED_FILE_MODES}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.UNTRACKED_FILE_MODES}
 					}
 					'^(?<k>--column=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{
@@ -2284,11 +2285,11 @@ function __git_complete
 
 			'revert' {
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/REVERT_HEAD") {
-					return __gitcomp @{suggest = $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.REVERT}
+					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.REVERT}
 				}
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-edit' -excl $GIT_COMPLETION.SUBOPTIONS.INPROGRESS.REVERT
+						return __gitcomp_builtin $command '--no-edit' -excl $opts.SUBOPTIONS.INPROGRESS.REVERT
 					}
 				}
 				return __gitcomp -text @{suggest = __git_refs}
@@ -2311,8 +2312,8 @@ function __git_complete
 					'^--' {
 						return __gitcomp @{
 							suggest = @(
-								$GIT_COMPLETION.LOG_COMMON
-								$GIT_COMPLETION.LOG_SHORTLOG
+								$opts.LOG_COMMON
+								$opts.LOG_SHORTLOG
 								'--numbered','--summary','--email'
 							)
 						}
@@ -2329,23 +2330,23 @@ function __git_complete
 					'^(?<k>--(?:pretty|format)=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{
 							suggest = @(
-								$GIT_COMPLETION.LOG_PRETTY_FORMATS
+								$opts.LOG_PRETTY_FORMATS
 								__git_get_config_variables 'pretty'
 							)
 						}
 					}
 					'^(?<k>--diff-algorithm=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_ALGORITHMS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_ALGORITHMS}
 					}
 					'^(?<k>--submodule=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = $GIT_COMPLETION.DIFF_SUBMODULE_FORMATS}
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.DIFF_SUBMODULE_FORMATS}
 					}
 					'^--' {
 						return __gitcomp @{
 							suggest = @(
 								'--pretty=','--format=','--abbrev-commit','--oneline'
 								'--show-signature'
-								$GIT_COMPLETION.DIFF_COMMON
+								$opts.DIFF_COMMON
 							)
 						}
 					}
@@ -2671,7 +2672,7 @@ function __git_complete
 		}
 		switch -wildcard ($info.curr) {
 			'--*' {
-				return __gitcomp @{suggest = $GIT_COMPLETION.OPTIONS}
+				return __gitcomp @{suggest = $opts.OPTIONS}
 			}
 		}
 		return __gitcomp -text @{
