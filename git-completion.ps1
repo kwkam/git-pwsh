@@ -1,7 +1,7 @@
 # pwsh completion support for core Git.
 # vi: ts=2 sw=2
 #
-# A clone of git-completion.sh from:
+# A clone of git-completion.bash from:
 # https://github.com/git/git/tree/master/contrib/completion
 #
 # The contained completion routines provide support for completing:
@@ -26,7 +26,7 @@
 #
 # If you use complex aliases of form "!pwsh -c 'function f { ... }; f'",
 # the argument @args or $args[a[..b]] will be searched to detect the desired
-# completion style.  For example,
+# completion style. For example,
 #   "!pwsh -c 'function f { git commit `@args; ... }; f'"
 # will tell the completion to use commit completion.
 #
@@ -795,7 +795,7 @@ function __git_complete
 			if ($_ -match $pattern) {
 				"$pfx$($matches.v)$sfx"
 			} else {
-				$hash, $i = $_ -split '\t'
+				$hash,$i = $_ -split '\t'
 				"$pfx$i$sfx" # symbolic refs
 			}
 		})
@@ -2205,7 +2205,7 @@ function __git_complete
 					'add' {
 						switch -regex ($info.curr) {
 							'^--' {
-								return __gitcomp_builtin $command, $subcommand '--no-tags'
+								return __gitcomp_builtin $command,$subcommand '--no-tags'
 							}
 						}
 						return
@@ -2213,7 +2213,7 @@ function __git_complete
 					{$_ -in 'set-head','set-branches'} {
 						switch -regex ($info.curr) {
 							'^--' {
-								return __gitcomp_builtin $command, $subcommand
+								return __gitcomp_builtin $command,$subcommand
 							}
 						}
 						$params = @{cmd = $command}
@@ -2240,7 +2240,7 @@ function __git_complete
 					'update' {
 						switch -regex ($info.curr) {
 							'^--' {
-								return __gitcomp_builtin $command, $subcommand
+								return __gitcomp_builtin $command,$subcommand
 							}
 						}
 						return __gitcomp -text @{suggest = __git_get_config_variables 'remotes'}
@@ -2248,7 +2248,7 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command, $subcommand
+						return __gitcomp_builtin $command,$subcommand
 					}
 				}
 				return __gitcomp -text @{suggest = __git_remotes}

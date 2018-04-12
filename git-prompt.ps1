@@ -186,13 +186,13 @@ function __git_ps1_colorize_gitstring
 }
 
 # __git_ps1 accepts 0 or 1 arguments (i.e., format string)
-# when called from prompt function using command substitution
-# in this mode it prints text to add to pwsh prompt (includes branch name)
+# when called from function using command substitution
+# in this mode it prints text to add to the string (includes branch name)
 #
 # __git_ps1 requires 2 or 3 arguments when called from prompt function (pc)
 # when two arguments are given, the first is prepended and the second appended
 # to the state string when assigned to prompt string.
-# The optional third parameter will be used as C# format string to further
+# The optional third parameter will be used as .NET format string to further
 # customize the output of the git-status string.
 # In this mode you can request colored hints using SHOWCOLORHINTS=true
 function __git_ps1
@@ -204,18 +204,11 @@ function __git_ps1
 		[hashtable] $opts = $GIT_PS1
 	)
 
-	if ($ps1pc_start -and $ps1pc_end) {
-		# set prompt to a plain prompt so that we can
-		# simply return early if the prompt should not
-		# be decorated
-		$ps1pc = "$ps1pc_start$ps1pc_end"
-	}
-
 	$info = @{}
 
 	function __git_ps1_status {
 		if (! $info.Contains('status')) {
-			$branch, $fileinfo = git status --branch --porcelain
+			$branch,$fileinfo = git status --branch --porcelain
 			$info.status = @{fileinfo = @($fileinfo)}
 			if ($branch -match '^## (?<cb>\S+?)(?:\.\.\.(?<ub>\S+)(?: \[(?<k1>\w+) (?<v1>\d+)(?:, (?<k2>\w+) (?<v2>\d+))?\])?)?$') {
 				switch ($matches) {
@@ -253,6 +246,13 @@ function __git_ps1
 				}
 			}
 		}
+	}
+
+	if ($ps1pc_start -and $ps1pc_end) {
+		# set prompt to a plain prompt so that we can
+		# simply return early if the prompt should not
+		# be decorated
+		$ps1pc = "$ps1pc_start$ps1pc_end"
 	}
 
 	$repo_info = git rev-parse --git-dir `
@@ -337,8 +337,7 @@ function __git_ps1
 					}
 				} else {
 					if ($status.ahead -and $status.behind) {
-						$info.a = '<'
-						$info.d = '>'
+						$info.a,$info.d = '<','>'
 					} elseif ($status.ahead) {
 						$info.a = '>'
 					} elseif ($status.behind) {
