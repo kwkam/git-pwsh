@@ -493,6 +493,19 @@ function __git_complete
 		return $info.repo_path
 	}
 
+	function __git_dequote_token
+	{
+		param (
+			[Management.Automation.Language.Token] $token
+		)
+
+		if ($token.Kind -eq [Management.Automation.Language.TokenKind]::StringLiteral -or
+				$token.Kind -eq [Management.Automation.Language.TokenKind]::StringExpandable) {
+			return $token.Value
+		}
+		return $token.Text
+	}
+
 	# Generates completion reply, appending a space to possible completion words,
 	# if necessary.
 	# It accepts 1 to 4 arguments:
@@ -2580,17 +2593,17 @@ function __git_complete
 		}
 	}
 
-	$info.prev = ValueOfToken $cmdline.prev
-	$info.curr = ValueOfToken $cmdline.curr
+	$info.prev = __git_dequote_token $cmdline.prev
+	$info.curr = __git_dequote_token $cmdline.curr
 	$info.words = for ($idx = 0; $idx -lt $cmdline.words.Count; $idx++) {
-		switch -regex (ValueOfToken $cmdline.words[$idx]) {
+		switch -regex (__git_dequote_token $cmdline.words[$idx]) {
 			'^--git-dir=(?<path>.+)' {
 				$info.git_dir = $matches.path
 				continue
 			}
 			{$_ -in '--git-dir'} {
 				if (++$idx -lt $cmdline.words.Count) {
-					$info.git_dir = ValueOfToken $cmdline.words[$idx]
+					$info.git_dir = __git_dequote_token $cmdline.words[$idx]
 				}
 				continue
 			}
@@ -2611,7 +2624,7 @@ function __git_complete
 				if (++$idx -lt $cmdline.words.Count) {
 					$info.git_C_args = @(
 						$_
-						ValueOfToken $cmdline.words[$idx]
+						__git_dequote_token $cmdline.words[$idx]
 					)
 				}
 				continue
@@ -2684,19 +2697,6 @@ function __git_complete
 	}
 
 	return _git_cmd $info.command
-}
-
-function ValueOfToken
-{
-	param (
-		[Management.Automation.Language.Token] $token
-	)
-
-	if ($token.Kind -eq [Management.Automation.Language.TokenKind]::StringLiteral -or
-	    $token.Kind -eq [Management.Automation.Language.TokenKind]::StringExpandable) {
-		return $token.Value
-	}
-	return $token.Text
 }
 
 # TODO improve or replace this
