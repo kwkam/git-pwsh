@@ -1,8 +1,7 @@
 # git-pwsh
-Provide status prompt and completion based on [Bash completion from Git](
-https://github.com/git/git/tree/master/contrib/completion
-)\
-Currently does not support completion for `gitk` and `git svn`
+Provide status prompt and completion for [PowerShell Core](https://github.com/PowerShell/PowerShell)\
+Based mainly on [Bash completion from Git](https://github.com/git/git/tree/master/contrib/completion)\
+*Currently does not support completion for `gitk` and `git svn`*
 
 ## How to use
 1. Clone the repository to the user modules directory:
@@ -19,7 +18,7 @@ $PromptPrefix = {
     $u = [Environment]::UserName
     $h = [Environment]::MachineName
     $w = $PWD.Path.Replace($HOME, '~')
-    "PS `e[0;33m$u@$h`e[m `e[1;36m$w`e[m"
+    "PS `e[0;33m$u@$h`e[m `e[0;36m$w`e[m"
 }
 $PromptSuffix = {
     "`n`e[1;30m$NestedPromptLevel`e[m> "
