@@ -1245,6 +1245,21 @@ function __git_complete
 		}
 	}
 
+	function __git_support_parseopt_helper
+	{
+		param (
+			[parameter(mandatory = $true)]
+			[string] $cmd
+		)
+		if (! $opts.Contains('PARSEOPT_COMMANDS')) {
+			$list = $(__git --list-parseopt-builtins) -split ' +'
+			if ($list) {
+				$opts.PARSEOPT_COMMANDS = $list.Where({$_})
+			}
+		}
+		return $cmd -in $opts.PARSEOPT_COMMANDS
+	}
+
 	function _git_cmd
 	{
 		param (
@@ -1402,6 +1417,11 @@ function __git_complete
 			}
 
 			'cherry' {
+				switch -regex ($info.curr) {
+					'^--' {
+						return __gitcomp_builtin $command
+					}
+				}
 				return __gitcomp -text @{suggest = __git_refs}
 			}
 
@@ -1711,14 +1731,6 @@ function __git_complete
 				}
 			}
 
-			'gc' {
-				switch -regex ($info.curr) {
-					'^--' {
-						return __gitcomp_builtin $command
-					}
-				}
-			}
-
 			'grep' {
 				if ($info.has_doubledash) {
 					return
@@ -1788,6 +1800,11 @@ function __git_complete
 			}
 
 			'ls-tree' {
+				switch -regex ($info.curr) {
+					'^--' {
+						return __gitcomp_builtin $command
+					}
+				}
 				return __git_complete_revlist
 			}
 
@@ -1925,10 +1942,6 @@ function __git_complete
 					}
 				)
 				return __git_complete_index_file $complete_opt
-			}
-
-			'name-rev' {
-				return __gitcomp_builtin $command
 			}
 
 			'notes' {
@@ -2636,13 +2649,21 @@ function __git_complete
 			}
 
 			default {
-				if (! $expand) {
-					# do not expand alias
+				# complete builtin common
+				if (__git_support_parseopt_helper $command) {
+					switch -regex ($info.curr) {
+						'^--' {
+							return __gitcomp_builtin $command
+						}
+					}
 					return
 				}
-				$expand.inputScript = __git_aliased_command $command
-				$expand.paramName = 'args'
-				$expand.paramIndex = $info.parameter_curr
+				# alias expansion
+				if ($expand) {
+					$expand.inputScript = __git_aliased_command $command
+					$expand.paramName = 'args'
+					$expand.paramIndex = $info.parameter_curr
+				}
 			}
 
 		}
