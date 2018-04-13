@@ -236,16 +236,11 @@ function __git_prompt
 		return [string]::Concat($name, $stat)
 	}
 
-	# __git_ps1 accepts 0 or 1 arguments (i.e., format string)
-	# when called from function using command substitution
-	# in this mode it prints text to add to the string (includes branch name)
-	#
-	# __git_ps1 requires 2 or 3 arguments when called from prompt function (pc)
-	# when two arguments are given, the first is prepended and the second appended
-	# to the state string when assigned to prompt string.
-	# The optional third parameter will be used as .NET format string to further
+	# __git_ps1 requires 1 arguments (format string)
+	# The required parameter will be used as .NET format string to further
 	# customize the output of the git-status string.
-	# In this mode you can request colored hints using SHOWCOLORHINTS=true
+	# It prints text to add to the string (includes branch name)
+	# You can request colored hints using SHOWCOLORHINTS=true
 	function __git_ps1
 	{
 		param (
@@ -425,6 +420,7 @@ function __git_prompt
 		}
 
 		$info.z = if ($opts.Contains('STATESEPARATOR')) { $opts.STATESEPARATOR } else { ' ' }
+
 		$palette = if ($opts.SHOWCOLORHINTS) { $opts.PALETTE }
 		return $format -f $(__git_ps1_colorize_gitstring $palette)
 	}

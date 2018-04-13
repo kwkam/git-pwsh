@@ -14,7 +14,7 @@ if ($(Test-Path function:/Prompt) -and ! $(Test-Path function:/NotGitPrompt)) {
 	Rename-Item function:/Prompt NotGitPrompt
 }
 
-# TODO improve or replace this
+# FIXME improve or replace this
 function GetCursorCommandLine
 {
 	[CmdletBinding(DefaultParameterSetName = 'ScriptInputSet')]
@@ -204,7 +204,7 @@ function GetParamCommandLine
 			switch -wildcard ($tokens[$idx]) {
 				'-c*' {
 					if (++$idx -lt $tokens.Count) {
-						# NOTE assume token is Kind.String*
+						# XXX assume token is Kind.String*
 						return GetParamCommandLine $tokens[$idx].Value $paramName $paramIndex
 					}
 				}
@@ -233,7 +233,7 @@ function GetParamCommandLine
 						$tokens[$nxt]
 					}
 					if ($range.Count -ge 3) {
-						# NOTE for $var[0..$var.Count], always assume index < $var.Count
+						# XXX for $var[0..$var.Count], always assume index < $var.Count
 						if (($range[0].Kind -eq [Management.Automation.Language.TokenKind]::Number -and
 						     $range[0].Value -le $paramIndex) -and
 						    ($range[2].Kind -ne [Management.Automation.Language.TokenKind]::Number -or
