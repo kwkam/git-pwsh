@@ -496,6 +496,7 @@ function __git_complete
 	function __git_dequote_token
 	{
 		param (
+			[parameter(mandatory = $true)]
 			[Management.Automation.Language.Token] $token
 		)
 
@@ -711,7 +712,7 @@ function __git_complete
 	{
 		param (
 			[string] $remote,
-			[bool] $track,
+			[switch] $track,
 			[string] $pfx,
 			[string] $cur = $info.curr,
 			[string] $sfx
@@ -837,12 +838,9 @@ function __git_complete
 	{
 		param (
 			[string[]] $options,
-			[string] $root
+			[string] $root = '.'
 		)
 
-		if (! $root) {
-			$root = $PWD.Path
-		}
 		if ($options -eq '--committable') {
 			__git -C $root diff-index --name-only --relative HEAD
 		} else {
@@ -1002,7 +1000,9 @@ function __git_complete
 			}
 		}
 		# NOTE this works because git does not list directory itself
-		$matches = __git_ls_files_helper $options $pre | Select-String '(?<d>^[^/]+/)|(?<f>^[^/]+$)' | % Matches
+		$params = @{options = $options}
+		if ($pre) { $params.root = $pre }
+		$matches = __git_ls_files_helper @params | Select-String '(?<d>^[^/]+/)|(?<f>^[^/]+$)' | % Matches
 		return __gitcomp -text -prefix $pre -word $val @(
 			@{
 				suggest = $matches | % {$_.Groups['d'].Captures} | Select-Object -Unique | % Value
@@ -1245,6 +1245,7 @@ function __git_complete
 	function _git_cmd
 	{
 		param (
+			[parameter(mandatory = $true)]
 			[string] $command
 		)
 
@@ -2593,8 +2594,8 @@ function __git_complete
 		}
 	}
 
-	$info.prev = __git_dequote_token $cmdline.prev
-	$info.curr = __git_dequote_token $cmdline.curr
+	$info.prev = if ($cmdline.prev) { __git_dequote_token $cmdline.prev }
+	$info.curr = if ($cmdline.curr) { __git_dequote_token $cmdline.curr }
 	$info.words = for ($idx = 0; $idx -lt $cmdline.words.Count; $idx++) {
 		switch -regex (__git_dequote_token $cmdline.words[$idx]) {
 			'^--git-dir=(?<path>.+)' {
