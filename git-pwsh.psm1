@@ -1,4 +1,5 @@
 # git-pwsh module
+# vi: ts=2 sw=2
 
 . $PSScriptRoot/git-completion.ps1
 . $PSScriptRoot/git-prompt.ps1
@@ -203,6 +204,7 @@ function GetParamCommandLine
 			switch -wildcard ($tokens[$idx]) {
 				'-c*' {
 					if (++$idx -lt $tokens.Count) {
+						# NOTE assume token is Kind.String*
 						return GetParamCommandLine $tokens[$idx].Value $paramName $paramIndex
 					}
 				}
@@ -322,15 +324,12 @@ function Prompt
 	}
 	if (! $PromptPrefix) {
 		$PromptPrefix = {
-			$u = [Environment]::UserName
-			$h = [Environment]::MachineName
-			$w = $PWD.Path.Replace($HOME, '~')
-			"PS `e[0;33m$u@$h`e[m `e[0;36m$w`e[m"
+			"PS $([Environment]::UserName)@$([Environment]::MachineName) $($PWD.Path.Replace($HOME, '~'))"
 		}
 	}
 	if (! $PromptSuffix) {
 		$PromptSuffix = {
-			"`n`e[1;30m$NestedPromptLevel`e[m> "
+			"`n$NestedPromptLevel> "
 		}
 	}
 	"$($PromptPrefix.Invoke())$ps_git$($PromptSuffix.Invoke())"
@@ -342,6 +341,8 @@ $pubConf = @(
 )
 
 $pubFunc = @(
+	'GetCursorCommandLine' # for debug
+	'GetParamCommandLine'  # for debug
 	'TabExpansion2'
 	'Prompt'
 )
