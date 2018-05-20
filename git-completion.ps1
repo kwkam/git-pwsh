@@ -193,6 +193,7 @@ $GIT_COMPLETION = @{
 		'core.bigFileThreshold'
 		'core.checkStat'
 		'core.commentChar'
+		'core.commitGraph'
 		'core.compression'
 		'core.createObject'
 		'core.deltaBaseCacheLimit'
@@ -1083,6 +1084,7 @@ function __git_complete
 				'check-ref-format' { <# plumbing #> continue }
 				'checkout-index'   { <# plumbing #> continue }
 				'column'           { <# internal helper #> continue }
+				'commit-graph'     { <# plumbing #> continue }
 				'commit-tree'      { <# plumbing #> continue }
 				'count-objects'    { <# infrequent #> continue }
 				'credential'       { <# credentials #> continue }
