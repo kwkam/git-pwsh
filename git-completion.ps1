@@ -2381,8 +2381,11 @@ function __git_complete
 
 			'stash' {
 				$save_opts = '--all','--keep-index','--no-keep-index','--quiet','--patch','--include-untracked'
-				$subcommands = 'push','save','list','show','apply','clear','drop','pop','create','branch'
-				$subcommand = __git_find_on_cmdline $subcommands
+				$subcommands = 'push','list','show','apply','clear','drop','pop','create','branch'
+				$subcommandaliases = @{
+					'-p' = 'push'
+				}
+				$subcommand = __git_find_on_cmdline $subcommands,$subcommandaliases.Keys,'save'
 				if (! $subcommand) {
 					switch -regex ($info.curr) {
 						'^--' {
@@ -2390,9 +2393,15 @@ function __git_complete
 						}
 					}
 					if (__git_find_on_cmdline $save_opts) {
+						if ($info.curr -like 'sa*') {
+							return __gitcomp @{suggest = 'save'}
+						}
 						return
 					}
 					return __gitcomp -text @{suggest = $subcommands}
+				}
+				if ($subcommand -in $subcommandaliases.Keys) {
+					$subcommand = $subcommandaliases.$subcommand
 				}
 				switch ($subcommand) {
 					'push' {
