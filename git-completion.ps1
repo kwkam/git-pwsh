@@ -1474,7 +1474,7 @@ function __git_complete
 						return __gitcomp -text @{suggest = __git_refs}
 					}
 					{$_ -like 'branch.*.rebase'} {
-						return __gitcomp -text @{suggest = 'false','true','preserve','interactive'}
+						return __gitcomp -text @{suggest = 'false','true','merges','preserve','interactive'}
 					}
 					{$_ -in 'remote.pushdefault'} {
 						return __gitcomp -text @{suggest = __git_remotes}
@@ -2084,7 +2084,7 @@ function __git_complete
 						return __gitcomp @{
 							suggest = @(
 								'--onto','--merge','--strategy=','--interactive'
-								'--preserve-merges','--stat','--no-stat'
+								'--rebase-merges','--preserve-merges','--stat','--no-stat'
 								'--committer-date-is-author-date','--ignore-date'
 								'--ignore-whitespace','--whitespace='
 								'--autosquash','--no-autosquash'
