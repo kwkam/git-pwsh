@@ -1517,7 +1517,7 @@ function __git_complete
 					{$_ -in 'log.date'} {
 						return __gitcomp -text @{suggest = $opts.LOG_DATE_FORMATS}
 					}
-					{$_ -in 'sendemail.aliasesfiletype'} {
+					{$_ -in 'sendemail.aliasfiletype'} {
 						return __gitcomp -text @{suggest = 'mutt','mailrc','pine','elm','gnus'}
 					}
 					{$_ -in 'sendemail.confirm'} {
