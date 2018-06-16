@@ -248,11 +248,15 @@ function __git_prompt
 			[string] $format
 		)
 
-		$repo_info = git rev-parse --git-dir `
-															 --is-inside-git-dir `
-															 --is-bare-repository `
-															 --is-inside-work-tree `
-															 --short HEAD 2> $null
+		try {
+			$repo_info = git rev-parse --git-dir `
+			                           --is-inside-git-dir `
+			                           --is-bare-repository `
+			                           --is-inside-work-tree `
+			                           --short HEAD 2> $null
+		} catch {
+			return
+		}
 
 		if ($repo_info.Count -lt 4) {
 			return
