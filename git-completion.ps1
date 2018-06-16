@@ -1048,22 +1048,12 @@ function __git_complete
 		}
 	}
 
-	function __git_commands
-	{
-		# NOTE depends on exe output
-		$(__git help -a).ForEach({
-			if ($_ -match '^  (?<cmds>\w.*)$') {
-				$matches.cmds -split ' +'
-			}
-		}) | Sort-Object
-	}
-
 	function __git_all_commands
 	{
 		if (! $opts.Contains('ALL_COMMANDS')) {
-			$opts.ALL_COMMANDS = switch -wildcard (__git_commands) {
-				'*--*'             { <# helper pattern #> continue }
-				default { $_ }
+			$list = $(__git --list-cmds='main,others,alias,nohelpers') -split ' +'
+			if ($list) {
+				$opts.ALL_COMMANDS = $list.Where({$_})
 			}
 		}
 		return $opts.ALL_COMMANDS
@@ -1072,87 +1062,23 @@ function __git_complete
 	function __git_porcelain_commands
 	{
 		if (! $opts.Contains('PORCELAIN_COMMANDS')) {
-			$opts.PORCELAIN_COMMANDS = switch -wildcard (__git_all_commands) {
-				'*--*'             { <# helper pattern #> continue }
-				'applymbox'        { <# ask gittus #> continue }
-				'applypatch'       { <# ask gittus #> continue }
-				'archimport'       { <# import #> continue }
-				'cat-file'         { <# plumbing #> continue }
-				'check-attr'       { <# plumbing #> continue }
-				'check-ignore'     { <# plumbing #> continue }
-				'check-mailmap'    { <# plumbing #> continue }
-				'check-ref-format' { <# plumbing #> continue }
-				'checkout-index'   { <# plumbing #> continue }
-				'column'           { <# internal helper #> continue }
-				'commit-graph'     { <# plumbing #> continue }
-				'commit-tree'      { <# plumbing #> continue }
-				'count-objects'    { <# infrequent #> continue }
-				'credential'       { <# credentials #> continue }
-				'credential-*'     { <# credentials helper #> continue }
-				'cvsexportcommit'  { <# export #> continue }
-				'cvsimport'        { <# import #> continue }
-				'cvsserver'        { <# daemon #> continue }
-				'daemon'           { <# daemon #> continue }
-				'diff-files'       { <# plumbing #> continue }
-				'diff-index'       { <# plumbing #> continue }
-				'diff-tree'        { <# plumbing #> continue }
-				'fast-import'      { <# import #> continue }
-				'fast-export'      { <# export #> continue }
-				'fsck-objects'     { <# plumbing #> continue }
-				'fetch-pack'       { <# plumbing #> continue }
-				'fmt-merge-msg'    { <# plumbing #> continue }
-				'for-each-ref'     { <# plumbing #> continue }
-				'hash-object'      { <# plumbing #> continue }
-				'http-*'           { <# transport #> continue }
-				'index-pack'       { <# plumbing #> continue }
-				'init-db'          { <# deprecated #> continue }
-				'local-fetch'      { <# plumbing #> continue }
-				'ls-files'         { <# plumbing #> continue }
-				'ls-remote'        { <# plumbing #> continue }
-				'ls-tree'          { <# plumbing #> continue }
-				'mailinfo'         { <# plumbing #> continue }
-				'mailsplit'        { <# plumbing #> continue }
-				'merge-*'          { <# plumbing #> continue }
-				'mktree'           { <# plumbing #> continue }
-				'mktag'            { <# plumbing #> continue }
-				'pack-objects'     { <# plumbing #> continue }
-				'pack-redundant'   { <# plumbing #> continue }
-				'pack-refs'        { <# plumbing #> continue }
-				'parse-remote'     { <# plumbing #> continue }
-				'patch-id'         { <# plumbing #> continue }
-				'prune'            { <# plumbing #> continue }
-				'prune-packed'     { <# plumbing #> continue }
-				'quiltimport'      { <# import #> continue }
-				'read-tree'        { <# plumbing #> continue }
-				'receive-pack'     { <# plumbing #> continue }
-				'remote-*'         { <# transport #> continue }
-				'rerere'           { <# plumbing #> continue }
-				'rev-list'         { <# plumbing #> continue }
-				'rev-parse'        { <# plumbing #> continue }
-				'runstatus'        { <# plumbing #> continue }
-				'sh-setup'         { <# internal #> continue }
-				'shell'            { <# daemon #> continue }
-				'show-ref'         { <# plumbing #> continue }
-				'send-pack'        { <# plumbing #> continue }
-				'show-index'       { <# plumbing #> continue }
-				'ssh-*'            { <# transport #> continue }
-				'stripspace'       { <# plumbing #> continue }
-				'symbolic-ref'     { <# plumbing #> continue }
-				'unpack-file'      { <# plumbing #> continue }
-				'unpack-objects'   { <# plumbing #> continue }
-				'update-index'     { <# plumbing #> continue }
-				'update-ref'       { <# plumbing #> continue }
-				'update-server-info' { <# daemon #> continue }
-				'upload-archive'   { <# plumbing #> continue }
-				'upload-pack'      { <# plumbing #> continue }
-				'write-tree'       { <# plumbing #> continue }
-				'var'              { <# infrequent #> continue }
-				'verify-pack'      { <# infrequent #> continue }
-				'verify-tag'       { <# plumbing #> continue }
-				default { $_ }
+			$list = $(__git --list-cmds='list-mainporcelain,others,nohelpers,alias,list-complete,config') -split ' +'
+			if ($list) {
+				$opts.PORCELAIN_COMMANDS = $list.Where({$_})
 			}
 		}
 		return $opts.PORCELAIN_COMMANDS
+	}
+
+	function __git_help_commands
+	{
+		if (! $opts.Contains('HELP_COMMANDS')) {
+			$list = $(__git --list-cmds='main,nohelpers,alias,list-guide') -split ' +'
+			if ($list) {
+				$opts.HELP_COMMANDS = $list.Where({$_})
+			}
+		}
+		return $opts.HELP_COMMANDS
 	}
 
 	# __git_aliased_command requires 1 argument
@@ -1252,7 +1178,7 @@ function __git_complete
 			[string] $cmd
 		)
 		if (! $opts.Contains('PARSEOPT_COMMANDS')) {
-			$list = $(__git --list-parseopt-builtins) -split ' +'
+			$list = $(__git --list-cmds='parseopt') -split ' +'
 			if ($list) {
 				$opts.PARSEOPT_COMMANDS = $list.Where({$_})
 			}
@@ -1754,16 +1680,7 @@ function __git_complete
 						return __gitcomp_builtin $command
 					}
 				}
-				return __gitcomp -text @{
-					suggest = @(
-						__git_all_commands
-						__git_get_config_variables 'alias'
-						'attributes','cli','core-tutorial','cvs-migration'
-						'diffcore','everyday','gitk','glossary','hooks','ignore','modules'
-						'namespaces','repository-layout','revisions','tutorial','tutorial-2'
-						'workflows'
-					)
-				}
+				return __gitcomp -text @{suggest = __git_help_commands}
 			}
 
 			'init' {
@@ -2764,12 +2681,7 @@ function __git_complete
 				return __gitcomp @{suggest = $opts.OPTIONS}
 			}
 		}
-		return __gitcomp -text @{
-			suggest = @(
-				__git_porcelain_commands
-				__git_get_config_variables 'alias'
-			)
-		}
+		return __gitcomp -text @{suggest = __git_porcelain_commands}
 	}
 
 	return _git_cmd $info.command
