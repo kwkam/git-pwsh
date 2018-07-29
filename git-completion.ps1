@@ -2259,7 +2259,12 @@ function __git_complete
 								return __gitcomp_builtin $command,$subcommand
 							}
 						}
-						return __gitcomp -text @{suggest = __git_get_config_variables 'remotes'}
+						return __gitcomp -text @{
+							suggest = @(
+								__git_remotes
+								__git_get_config_variables 'remotes'
+							)
+						}
 					}
 				}
 				switch -regex ($info.curr) {
