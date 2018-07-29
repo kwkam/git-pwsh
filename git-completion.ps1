@@ -207,6 +207,20 @@ function __git_complete
 			return
 		}
 
+		$conds = @(
+			'--no-*'
+		) | % {
+			if ($word -notlike $_) {
+				"`$_ -notlike '$_'"
+			}
+		}
+
+		$matcher = if ($conds) {
+			[scriptblock]::Create($conds -join ' -and ')
+		} else {
+			{$true}
+		}
+
 		$pattern = "$word*"
 
 		# set common parameters
@@ -237,7 +251,7 @@ function __git_complete
 					$type = [Management.Automation.CompletionResultType]::ParameterName
 				}
 			}
-			$suggest.ForEach({
+			$suggest.Where($matcher).ForEach({
 				$s = $_
 				if ($suffix) {
 					$s = "$s$suffix"
@@ -889,7 +903,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.WHITESPACELIST}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-utf8' -excl $opts.SUBOPTIONS.INPROGRESS.AM
+						return __gitcomp_builtin $command -excl $opts.SUBOPTIONS.INPROGRESS.AM
 					}
 				}
 			}
@@ -968,7 +982,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git_refs -cur $matches.v}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-color','--no-abbrev','--no-track','--no-column'
+						return __gitcomp_builtin $command
 					}
 				}
 				switch ($info.words) {
@@ -1014,7 +1028,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'diff3','merge'}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-track','--no-recurse-submodules'
+						return __gitcomp_builtin $command
 					}
 				}
 				# check if --track, --no-track, or --no-guess was specified
@@ -1061,7 +1075,7 @@ function __git_complete
 			'clone' {
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-single-branch'
+						return __gitcomp_builtin $command
 					}
 				}
 			}
@@ -1083,7 +1097,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.UNTRACKED_FILE_MODES}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-edit','--verify'
+						return __gitcomp_builtin $command
 					}
 				}
 				__git rev-parse --verify --quiet HEAD > $null
@@ -1294,7 +1308,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.FETCH_RECURSE_SUBMODULES}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-tags'
+						return __gitcomp_builtin $command
 					}
 				}
 				$params = @{cmd = $command}
@@ -1338,7 +1352,7 @@ function __git_complete
 			'fsck' {
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-reflogs'
+						return __gitcomp_builtin $command
 					}
 				}
 			}
@@ -1385,7 +1399,7 @@ function __git_complete
 			'ls-files' {
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-empty-directory'
+						return __gitcomp_builtin $command
 					}
 				}
 				# XXX ignore options like --modified and always suggest all cached
@@ -1498,13 +1512,7 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command @(
-							'--no-rerere-autoupdate'
-							'--no-commit','--no-edit','--no-ff'
-							'--no-log','--no-progress'
-							'--no-squash','--no-stat'
-							'--no-verify-signatures'
-						)
+						return __gitcomp_builtin $command
 					}
 				}
 				return __gitcomp -text @{suggest = __git_refs}
@@ -1614,12 +1622,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.FETCH_RECURSE_SUBMODULES}
 					}
 					'^--' {
-						return __gitcomp_builtin $command @(
-							'--no-autostash','--no-commit','--no-edit'
-							'--no-ff','--no-log','--no-progress','--no-rebase'
-							'--no-squash','--no-stat','--no-tags'
-							'--no-verify-signatures'
-						)
+						return __gitcomp_builtin $command
 					}
 				}
 				$params = @{cmd = $command}
@@ -1813,7 +1816,7 @@ function __git_complete
 						}
 					}
 					'^--' {
-						return __gitcomp_builtin $command '--no-column'
+						return __gitcomp_builtin $command
 					}
 				}
 				switch -regex ($info.words) {
@@ -1864,7 +1867,7 @@ function __git_complete
 					'add' {
 						switch -regex ($info.curr) {
 							'^--' {
-								return __gitcomp_builtin $command,$subcommand '--no-tags'
+								return __gitcomp_builtin $command,$subcommand
 							}
 						}
 						return
@@ -1957,7 +1960,7 @@ function __git_complete
 				}
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-edit' -excl $opts.SUBOPTIONS.INPROGRESS.REVERT
+						return __gitcomp_builtin $command -excl $opts.SUBOPTIONS.INPROGRESS.REVERT
 					}
 				}
 				return __gitcomp -text @{suggest = __git_refs}
@@ -2025,7 +2028,7 @@ function __git_complete
 			'show-branch' {
 				switch -regex ($info.curr) {
 					'^--' {
-						return __gitcomp_builtin $command '--no-color'
+						return __gitcomp_builtin $command
 					}
 				}
 				return __git_complete_revlist
