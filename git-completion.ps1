@@ -2458,6 +2458,13 @@ function __git_complete
 							}
 						}
 					}
+					'list' {
+						switch -regex ($info.curr) {
+							'^--' {
+								return __gitcomp @{suggest = '--name-status','--oneline','--patch-with-stat'}
+							}
+						}
+					}
 					'show' {
 						switch -regex ($info.curr) {
 							'^--' {
