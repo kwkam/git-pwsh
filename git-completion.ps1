@@ -1041,15 +1041,6 @@ function __git_complete
 				return __gitcomp -text @{suggest = __git_refs @track_opt}
 			}
 
-			'cherry' {
-				switch -regex ($info.curr) {
-					'^--' {
-						return __gitcomp_builtin $command
-					}
-				}
-				return __gitcomp -text @{suggest = __git_refs}
-			}
-
 			'cherry-pick' {
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/CHERRY_PICK_HEAD") {
 					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.CHERRY_PICK}
