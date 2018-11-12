@@ -2060,6 +2060,20 @@ function __git_complete
 				return __git_complete_remote_or_refspec @params
 			}
 
+			'range-diff' {
+				switch -regex ($info.curr) {
+					'^--' {
+						return __gitcomp @{
+							suggest = @(
+								'--creation-factor=','--no-dual-color'
+								$opts.SUBOPTIONS.DIFF_COMMON
+							)
+						}
+					}
+				}
+				return __git_complete_revlist
+			}
+
 			'rebase' {
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/rebase-merge/interactive") {
 					return __gitcomp @{
