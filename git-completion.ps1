@@ -1669,6 +1669,10 @@ function __git_complete
 					'--all' {
 						return
 					}
+					{$_ -in '--multiple'} {
+						$params.no_refspec = $true
+						break
+					}
 					$info.curr {
 						continue
 					}
@@ -2003,6 +2007,10 @@ function __git_complete
 				}
 				$params = @{cmd = $command}
 				switch -wildcard ($info.words) {
+					{$_ -in '--multiple'} {
+						$params.no_refspec = $true
+						break
+					}
 					$info.curr {
 						continue
 					}
@@ -2042,6 +2050,10 @@ function __git_complete
 					}
 					{$_ -in '--all','--mirror'} {
 						$params.no_refspec = $true
+					}
+					{$_ -in '--multiple'} {
+						$params.no_refspec = $true
+						break
 					}
 					$info.curr {
 						continue
@@ -2248,6 +2260,10 @@ function __git_complete
 						}
 						$params = @{cmd = $command}
 						switch -wildcard ($info.words) {
+							{$_ -in '--multiple'} {
+								$params.no_refspec = $true
+								break
+							}
 							$info.curr {
 								continue
 							}
