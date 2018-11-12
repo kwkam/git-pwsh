@@ -303,8 +303,8 @@ function __git_complete
 		if (! $opts.SUBOPTIONS.Contains($key)) {
 			# NOTE depends on exe output
 			$list = @(
-				$(__git @cmd --git-completion-helper) -split ' +'
 				$incl
+				$(__git @cmd --git-completion-helper) -split ' +'
 			)
 			if ($list) {
 				$opts.SUBOPTIONS.$key = $list.Where({$_ -and $_ -notin $excl})
