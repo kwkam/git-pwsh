@@ -1895,7 +1895,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.SUBOPTIONS.MERGETOOL_COMMON}
 					}
 					'^--' {
-						return __gitcomp @{suggest = '--tool=','--prompt','--no-prompt'}
+						return __gitcomp @{suggest = '--tool=','--prompt','--no-prompt','--gui','--no-gui'}
 					}
 				}
 			}
