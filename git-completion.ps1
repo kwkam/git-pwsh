@@ -76,13 +76,9 @@ $GIT_COMPLETION = @{
 			'diffuse','diffmerge','ecmerge','emerge','kdiff3','meld','opendiff'
 			'tkdiff','vimdiff','gvimdiff','xxdiff','araxis','p4merge','bc','codecompare'
 		)
-		FORMAT_PATCH = @(
-			'--stdout','--attach','--no-attach','--thread','--thread=','--no-thread'
-			'--numbered','--start-number','--numbered-files','--keep-subject','--signoff'
-			'--signature','--no-signature','--in-reply-to=','--cc=','--full-index','--binary'
-			'--not','--all','--cover-letter','--no-prefix','--src-prefix=','--dst-prefix='
-			'--inline','--suffix=','--ignore-if-in-upstream','--subject-prefix='
-			'--output-directory','--reroll-count','--to=','--quiet','--notes'
+		FORMAT_PATCH_EXTRA = @(
+			'--full-index','--not','--all','--no-prefix','--src-prefix='
+			'--dst-prefix=','--notes'
 		)
 		LOG_COMMON = @(
 			'--not','--all'
@@ -1334,7 +1330,7 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = 'deep','shallow'}
 					}
 					'^--' {
-						return __gitcomp @{suggest = $opts.SUBOPTIONS.FORMAT_PATCH}
+						return __gitcomp_builtin $command -incl $opts.SUBOPTIONS.FORMAT_PATCH_EXTRA
 					}
 				}
 				return __git_complete_revlist
@@ -1770,20 +1766,18 @@ function __git_complete
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git send-email --dump-aliases}
 					}
 					'^--' {
-						return __gitcomp @{
-							suggest = @(
-								'--annotate','--bcc','--cc','--cc-cmd','--chain-reply-to'
-								'--compose','--confirm=','--dry-run','--envelope-sender'
-								'--from','--identity'
-								'--in-reply-to','--no-chain-reply-to','--no-signed-off-by-cc'
-								'--no-suppress-from','--no-thread','--quiet','--reply-to'
-								'--signed-off-by-cc','--smtp-pass','--smtp-server'
-								'--smtp-server-port','--smtp-encryption=','--smtp-user'
-								'--subject','--suppress-cc=','--suppress-from','--thread','--to'
-								'--validate','--no-validate'
-								$opts.SUBOPTIONS.FORMAT_PATCH
-							)
-						}
+						return __gitcomp_builtin $command -incl @(
+							'--annotate','--bcc','--cc','--cc-cmd','--chain-reply-to'
+							'--compose','--confirm=','--dry-run','--envelope-sender'
+							'--from','--identity'
+							'--in-reply-to','--no-chain-reply-to','--no-signed-off-by-cc'
+							'--no-suppress-from','--no-thread','--quiet','--reply-to'
+							'--signed-off-by-cc','--smtp-pass','--smtp-server'
+							'--smtp-server-port','--smtp-encryption=','--smtp-user'
+							'--subject','--suppress-cc=','--suppress-from','--thread','--to'
+							'--validate','--no-validate'
+							$opts.SUBOPTIONS.FORMAT_PATCH_EXTRA
+						)
 					}
 				}
 				return __git_complete_revlist
