@@ -127,9 +127,14 @@ function __git_prompt
 
 	$info = @{}
 
+	function __git
+	{
+		git @args
+	}
+
 	function __git_ps1_status {
 		if (! $info.Contains('status')) {
-			$branch,$fileinfo = git status --branch --porcelain
+			$branch,$fileinfo = __git status --branch --porcelain
 			$info.status = @{fileinfo = @($fileinfo)}
 			if ($branch -match '^## (?<cb>\S+?)(?:\.\.\.(?<ub>\S+)(?: \[(?<k1>\w+) (?<v1>\d+)(?:, (?<k2>\w+) (?<v2>\d+))?\])?)?$') {
 				switch ($matches) {
@@ -155,7 +160,7 @@ function __git_prompt
 		if (! $info.Contains('ref')) {
 			if ($(Get-Item -LiteralPath $gitdir/HEAD).Attributes -band [IO.FileAttributes]::ReparsePoint) {
 				# symlink symbolic ref
-				$info.ref = git symbolic-ref HEAD 2> $null
+				$info.ref = __git symbolic-ref HEAD 2> $null
 			} else {
 				$head = Get-Content -Head 1 -LiteralPath $gitdir/HEAD
 				if (! $head) {
@@ -249,7 +254,7 @@ function __git_prompt
 		)
 
 		try {
-			$repo_info = git rev-parse --git-dir `
+			$repo_info = __git rev-parse --git-dir `
 			                           --is-inside-git-dir `
 			                           --is-bare-repository `
 			                           --is-inside-work-tree `
@@ -271,7 +276,7 @@ function __git_prompt
 		}
 
 		if ($inside_worktree -and $opts.HIDE_IF_PWD_IGNORED) {
-			git check-ignore -q .
+			__git check-ignore -q .
 			if (! $LASTEXITCODE) {
 				return
 			}
@@ -306,7 +311,7 @@ function __git_prompt
 					$info.s = '$'
 				} else {
 					# fallback for case that refs/stash does not exist
-					git rev-parse --verify --quiet refs/stash > $null
+					__git rev-parse --verify --quiet refs/stash > $null
 					if (! $LASTEXITCODE) {
 						$info.s = '$!'
 					}
@@ -359,19 +364,19 @@ function __git_prompt
 				$info.detached = $true
 				$head = switch ($opts.DESCRIBE_STYLE) {
 					'contains' {
-						git describe --contains HEAD
+						__git describe --contains HEAD
 					}
 					'branch' {
-						git describe --contains --all HEAD
+						__git describe --contains --all HEAD
 					}
 					'tag' {
-						git describe --tags HEAD
+						__git describe --tags HEAD
 					}
 					'describe' {
-						git describe HEAD
+						__git describe HEAD
 					}
 					default {
-						git describe --tags --exact-match HEAD
+						__git describe --tags --exact-match HEAD
 					}
 				} 2> $null
 				if ($LASTEXITCODE) {

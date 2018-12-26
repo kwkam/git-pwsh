@@ -488,7 +488,7 @@ function __git_complete
 			} elseif (Test-Path -PathType Container -LiteralPath .git) {
 				$info.repo_path = '.git'
 			} else {
-				$info.repo_path = git rev-parse --git-dir 2> $null
+				$info.repo_path = __git rev-parse --git-dir 2> $null
 			}
 		}
 		return $info.repo_path
@@ -1051,7 +1051,7 @@ function __git_complete
 	function __git_commands
 	{
 		# NOTE depends on exe output
-		$(git help -a).ForEach({
+		$(__git help -a).ForEach({
 			if ($_ -match '^  (?<cmds>\w.*)$') {
 				$matches.cmds -split ' +'
 			}
@@ -1294,7 +1294,7 @@ function __git_complete
 			'archive' {
 				switch -regex ($info.curr) {
 					'^(?<k>--format=)(?<v>.*)' {
-						return __gitcomp_append $matches.k $matches.v @{suggest = git archive --list}
+						return __gitcomp_append $matches.k $matches.v @{suggest = __git archive --list}
 					}
 					'^(?<k>--remote=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = __git_remotes}
