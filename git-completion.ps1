@@ -1193,7 +1193,8 @@ function __git_complete
 		$(__git config --name-only --get-regexp "^$section\..*" 2> $null) -replace "^$section\.", ''
 	}
 
-	function __git_config_get_set_variables {
+	function __git_config_get_set_variables
+	{
 		switch -wildcard ($info.words) {
 			{$_ -in '--system','--global','--local'} {
 				$config_file = @($_)

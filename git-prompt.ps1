@@ -132,7 +132,8 @@ function __git_prompt
 		git @args
 	}
 
-	function __git_ps1_status {
+	function __git_ps1_status
+	{
 		if (! $info.Contains('status')) {
 			$branch,$fileinfo = __git status --branch --porcelain
 			$info.status = @{fileinfo = @($fileinfo)}
@@ -156,7 +157,8 @@ function __git_prompt
 		return $info.status
 	}
 
-	function __git_ps1_symbolic_ref {
+	function __git_ps1_symbolic_ref
+	{
 		if (! $info.Contains('ref')) {
 			if ($(Get-Item -LiteralPath $gitdir/HEAD).Attributes -band [IO.FileAttributes]::ReparsePoint) {
 				# symlink symbolic ref
