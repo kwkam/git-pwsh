@@ -118,7 +118,7 @@ $GIT_COMPLETION = @{
 function __git_complete
 {
 	param (
-		[parameter(mandatory = $true)]
+		[Parameter(Mandatory)]
 		[hashtable] $cmdline,
 		[hashtable] $expand,
 		[hashtable] $opts = $GIT_COMPLETION
@@ -175,7 +175,7 @@ function __git_complete
 	function __git_dequote_token
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[Management.Automation.Language.Token] $token
 		)
 
@@ -198,7 +198,7 @@ function __git_complete
 	function __gitcomp
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[hashtable[]] $complete,
 			[string] $prefix,
 			[string] $word = $info.curr,
@@ -295,7 +295,7 @@ function __git_complete
 	function __gitcomp_builtin
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string[]] $cmd,
 			[string[]] $incl,
 			[string[]] $excl
@@ -328,7 +328,7 @@ function __git_complete
 		param (
 			[string] $key,
 			[string] $value,
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[hashtable[]] $complete,
 			[switch] $text
 		)
@@ -513,7 +513,7 @@ function __git_complete
 	function __git_refs_remotes
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $repo,
 			[string] $refspec = $info.curr
 		)
@@ -610,7 +610,7 @@ function __git_complete
 	function __git_complete_remote_or_refspec
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $cmd,
 			[string] $remote,
 			[string] $word = $info.curr,
@@ -785,7 +785,7 @@ function __git_complete
 	function __git_aliased_command
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $command
 		)
 
@@ -796,7 +796,7 @@ function __git_complete
 	function __git_find_on_cmdline
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string[]] $words
 		)
 
@@ -823,7 +823,7 @@ function __git_complete
 	function __git_get_config_variables
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $section
 		)
 
@@ -885,7 +885,7 @@ function __git_complete
 	function __git_support_parseopt_helper
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $cmd
 		)
 		if (! $opts.Contains('PARSEOPT_COMMANDS')) {
@@ -900,7 +900,7 @@ function __git_complete
 	function _git_cmd
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $command
 		)
 

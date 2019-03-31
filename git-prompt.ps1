@@ -251,7 +251,7 @@ function __git_prompt
 	function __git_ps1
 	{
 		param (
-			[parameter(mandatory = $true)]
+			[Parameter(Mandatory)]
 			[string] $format
 		)
 

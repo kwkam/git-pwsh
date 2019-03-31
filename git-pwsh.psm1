@@ -19,19 +19,19 @@ function GetCursorCommandLine
 {
 	[CmdletBinding(DefaultParameterSetName = 'ScriptInputSet')]
 	Param (
-		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory = $true, Position = 0)]
+		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory, Position = 0)]
 		[string] $inputScript,
 
-		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory = $true, Position = 1)]
+		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory, Position = 1)]
 		[int] $cursorColumn,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 0)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 0)]
 		[Management.Automation.Language.Ast] $ast,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 1)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 1)]
 		[Management.Automation.Language.Token[]] $tokens,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 2)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 2)]
 		[Management.Automation.Language.IScriptPosition] $positionOfCursor,
 
 		[Parameter(ParameterSetName = 'ScriptInputSet', Position = 2)]
@@ -178,10 +178,10 @@ function GetCursorCommandLine
 function GetParamCommandLine
 {
 	Param (
-		[Parameter(Mandatory = $true, Position = 0)]
+		[Parameter(Mandatory, Position = 0)]
 		[string] $inputScript,
 
-		[Parameter(Mandatory = $true, Position = 1)]
+		[Parameter(Mandatory, Position = 1)]
 		[string] $paramName,
 
 		[Parameter(Position = 2)]
@@ -274,19 +274,19 @@ function TabExpansion2
 {
 	[CmdletBinding(DefaultParameterSetName = 'ScriptInputSet')]
 	Param (
-		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory = $true, Position = 0)]
+		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory, Position = 0)]
 		[string] $inputScript,
 
-		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory = $true, Position = 1)]
+		[Parameter(ParameterSetName = 'ScriptInputSet', Mandatory, Position = 1)]
 		[int] $cursorColumn,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 0)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 0)]
 		[Management.Automation.Language.Ast] $ast,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 1)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 1)]
 		[Management.Automation.Language.Token[]] $tokens,
 
-		[Parameter(ParameterSetName = 'AstInputSet', Mandatory = $true, Position = 2)]
+		[Parameter(ParameterSetName = 'AstInputSet', Mandatory, Position = 2)]
 		[Management.Automation.Language.IScriptPosition] $positionOfCursor,
 
 		[Parameter(ParameterSetName = 'ScriptInputSet', Position = 2)]
