@@ -97,11 +97,19 @@ $GIT_COMPLETION = @{
 	}
 	WHITESPACELIST = 'nowarn','warn','error','error-all','fix'
 	UNTRACKED_FILE_MODES = 'all','no','normal'
+	REF_FIELDLIST = 'refname','objecttype','objectsize','objectname','upstream','push','HEAD','symref'
 	DIFF_ALGORITHMS = 'myers','minimal','patience','histogram'
 	DIFF_SUBMODULE_FORMATS = 'diff','log','short'
 	FETCH_RECURSE_SUBMODULES = 'yes','on-demand','no'
-	LOG_PRETTY_FORMATS = 'oneline','short','medium','full','fuller','email','raw','format:'
-	LOG_DATE_FORMATS = 'relative','iso8601','rfc2822','short','local','default','raw'
+	LOG_PRETTY_FORMATS = 'oneline','short','medium','full','fuller','email','raw','format:','mboxrd'
+	LOG_DATE_FORMATS = 'relative','iso8601','iso8601-strict','rfc2822','short','local','default','raw','unix','format:'
+	MERGE_STRATEGY_OPTIONS = @(
+		'ours','theirs','subtree','subtree=','patience'
+		'histogram','diff-algorithm=','ignore-space-change','ignore-all-space'
+		'ignore-space-at-eol','renormalize','no-renormalize','no-renames'
+		'find-renames','find-renames=','rename-threshold='
+	)
+	PATCH_FORMATS = 'mbox','stgit','stgit-series','hg','mboxrd'
 	PUSH_RECURSE_SUBMODULES = 'check','on-demand','only'
 	SEND_EMAIL_CONFIRM = 'always','never','auto','cc','compose'
 	SEND_EMAIL_SUPPRESSCC = 'author','self','cc','bodycc','sob','cccmd','body','all'
@@ -707,10 +715,18 @@ function __git_complete
 				$info.result = __gitcomp -text @{suggest = __git_merge_strategies}
 				return $info.result
 			}
+			'-X' {
+				$info.result = __gitcomp -text @{suggest = $opts.MERGE_STRATEGY_OPTIONS}
+				return $info.result
+			}
 		}
 		switch -regex ($info.curr) {
 			'^(?<k>--strategy=)(?<v>.*)' {
 				$info.result = __gitcomp_append $matches.k $matches.v @{suggest = __git_merge_strategies}
+				return $info.result
+			}
+			'^(?<k>--strategy-option=)(?<v>.*)' {
+				$info.result = __gitcomp_append $matches.k $matches.v @{suggest = $opts.MERGE_STRATEGY_OPTIONS}
 				return $info.result
 			}
 		}
@@ -898,6 +914,9 @@ function __git_complete
 					'^(?<k>--whitespace=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.WHITESPACELIST}
 					}
+					'^(?<k>--patch-format=)(?<v>.*)' {
+						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.PATCH_FORMATS}
+					}
 					'^--' {
 						return __gitcomp_builtin $command -excl $opts.SUBOPTIONS.INPROGRESS.AM
 					}
@@ -917,6 +936,9 @@ function __git_complete
 
 			'add' {
 				switch -regex ($info.curr) {
+					'^(?<k>--chmod=)(?<v>.*)' {
+						return __gitcomp_append $matches.k $matches.v @{suggest = '+x','-x'}
+					}
 					'^--' {
 						return __gitcomp_builtin $command
 					}
@@ -1041,6 +1063,9 @@ function __git_complete
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/CHERRY_PICK_HEAD") {
 					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.CHERRY_PICK}
 				}
+				if (__git_complete_strategy) {
+					return $info.result
+				}
 				switch -regex ($info.curr) {
 					'^--' {
 						return __gitcomp_builtin $command -excl $opts.SUBOPTIONS.INPROGRESS.CHERRY_PICK
@@ -1142,7 +1167,7 @@ function __git_complete
 						}
 					}
 					{$_ -in 'diff.submodule'} {
-						return __gitcomp -text @{suggest = 'log','short'}
+						return __gitcomp -text @{suggest = $opts.DIFF_SUBMODULE_FORMATS}
 					}
 					{$_ -in 'help.format'} {
 						return __gitcomp -text @{suggest = 'man','info','web','html'}
@@ -1293,6 +1318,9 @@ function __git_complete
 				switch -regex ($info.curr) {
 					'^(?<k>--recurse-submodules=)(?<v>.*)' {
 						return __gitcomp_append $matches.k $matches.v @{suggest = $opts.FETCH_RECURSE_SUBMODULES}
+					}
+					'^(?<k>--filter=)(?<v>.*)' {
+						return __gitcomp_append $matches.k $matches.v @{suggest = 'blob:none','blob:limit=','sparse:oid=','sparse:path='}
 					}
 					'^--' {
 						return __gitcomp_builtin $command
@@ -1912,6 +1940,9 @@ function __git_complete
 
 			'replace' {
 				switch -regex ($info.curr) {
+					'^(?<k>--format=)(?<v>.*)' {
+						return __gitcomp_append $matches.k $matches.v @{suggest = 'short','medium','long'}
+					}
 					'^--' {
 						return __gitcomp_builtin $command
 					}
@@ -1942,6 +1973,9 @@ function __git_complete
 			'revert' {
 				if (Test-Path -Type Leaf -LiteralPath "$(__git_repo_path)/REVERT_HEAD") {
 					return __gitcomp @{suggest = $opts.SUBOPTIONS.INPROGRESS.REVERT}
+				}
+				if (__git_complete_strategy) {
+					return $info.result
 				}
 				switch -regex ($info.curr) {
 					'^--' {
