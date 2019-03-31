@@ -2114,7 +2114,7 @@ function __git_complete
 				if ($info.has_doubledash) {
 					return
 				}
-				$subcommands = 'add','status','init','deinit','update','summary','foreach','sync'
+				$subcommands = 'add','status','init','deinit','update','summary','foreach','sync','absorbgitdirs'
 				$subcommand = __git_find_on_cmdline $subcommands
 				if (! $subcommand) {
 					switch -regex ($info.curr) {
